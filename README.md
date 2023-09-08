@@ -289,4 +289,4 @@ Also here, we listing each function with explanation:
 ## Results
 
 We achieved the map with marked regions in Europe:
-
+![Europe](europe.png)
