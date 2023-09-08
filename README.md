@@ -18,6 +18,31 @@ AWS EMR: https://aws.amazon.com/emr/ \
 PySpark: https://spark.apache.org/docs/latest/api/python/index.html 
 
 ## Solution
+Flow: <br>
+  1) Define Geographical Bounds: Set the geographical coordinates for Europe as a tuple of (max_latitude, min_longitude, min_latitude, max_longitude).
+
+  2) Generate Tile URLs: Generate the URLs for map tiles that span the defined geographical area using the function generateTileUrls.
+
+  3) Load Image Data: Load the image data (map tiles) from the generated URLs into a Spark DataFrame using PySpark's read.format().
+
+  4) Refine Image Data: Extract the x and y tile indices from the origin column of the DataFrame and sort the rows based on these indices.
+
+  5) Extract Pixel Data: Select only the data column from the DataFrame, which contains the pixel information.
+
+  6) Reshape Pixel Data: Convert the PySpark DataFrame to an RDD and reshape the pixel data into NumPy arrays of shape (256, 256, 3).
+
+  7) Calculate Elevation: Use the function calculateElevation to transform the pixel data to elevation data.
+
+  8) Compute Gradients: Compute the x and y gradients using Sobel filters via OpenCV's cv2.Sobel() function.
+
+  9) Compute Gradient Magnitude: Calculate the magnitude of the gradients from the x and y components.
+
+  10) Generate Thresholds: Divide the gradient magnitude data into different groups using the function generateThresholds.
+
+  11) Apply Color Mapping: Apply color mapping to the gradient magnitude based on the threshold groups using the function applyColorMapping.
+
+  12) Display and Save Output: Use the function displayCompositeMap to display the final composite map. The composite map is also saved as a PNG file.
+
 Using JupyterNotebook we were able to divide each function to each cell to achieve clearness of code. Each function before implementation has a broad description how it works. \
 Also here, we listing each function with explanation:
 - [Functions](#functions)
