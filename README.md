@@ -225,90 +225,90 @@ Also here, we listing each function with explanation:
     This function takes a set of image pixel data and a list of threshold values, applies the threshold ranges to each pixel's value, and returns a new set of data with the pixel values converted to integers representing different color mappings.
     ### Parameters:
 
-      pixel_data: A set of image pixel data, usually in the form of a list of arrays.
-      thresholds: A list of numerical values used for defining threshold ranges.
+    pixel_data: A set of image pixel data, usually in the form of a list of arrays.
+    thresholds: A list of numerical values used for defining threshold ranges.
 
     ### Returns:
 
-      A new set of image pixel data where each pixel value has been mapped to an integer representing a color map value.
+    A new set of image pixel data where each pixel value has been mapped to an integer representing a color map value.
 
     ### Working Principle:
 
-      The function uses Spark's parallelize method to distribute the given pixel_data across multiple nodes for parallel processing.
-      It applies the map transformation to each element (usually an array representing a tile or a portion of an image) in the distributed data. The mapping function used is applyThresholds, which will change each pixel's value based on the            provided thresholds.
-      The transformed data is then collected back into a list using Spark's collect method.
+    The function uses Spark's parallelize method to distribute the given pixel_data across multiple nodes for parallel processing.
+    It applies the map transformation to each element (usually an array representing a tile or a portion of an image) in the distributed data. The mapping function used is applyThresholds, which will       change each pixel's value based on the            provided thresholds.
+    The transformed data is then collected back into a list using Spark's collect method.
   
     ## extractXCoordinate
 
     ### Description:
 
-      This function takes a file path string and extracts the x-coordinate value based on the path structure. This is useful when the file paths are structured in a way that they contain spatial coordinates (e.g., tile indexes for map tiles).
+  This function takes a file path string and extracts the x-coordinate value based on the path structure. This is useful when the file paths are structured in a way that they contain spatial              coordinates (e.g., tile indexes for map tiles).
     ### Parameters:
 
-      filepath: A string containing the file path from which the x-coordinate will be extracted.
+    filepath: A string containing the file path from which the x-coordinate will be extracted.
 
     ### Returns:
 
-      An integer representing the extracted x-coordinate.
+    An integer representing the extracted x-coordinate.
 
     ### Working Principle:
 
-      The function splits the filepath string using the slash / as a delimiter.
-      It then accesses the 6th index (assuming 0-based indexing) of the resulting list to obtain the x-coordinate, which is converted to an integer.
+    The function splits the filepath string using the slash / as a delimiter.
+    It then accesses the 6th index (assuming 0-based indexing) of the resulting list to obtain the x-coordinate, which is converted to an integer.
 
     ## extractYCoordinate
     ### Description:
 
-      This function takes a file path string and extracts the y-coordinate value based on the path structure. This is useful when the file paths are structured in a way that they contain spatial coordinates (e.g., tile indexes for map tiles).
+    This function takes a file path string and extracts the y-coordinate value based on the path structure. This is useful when the file paths are structured in a way that they contain spatial              coordinates (e.g., tile indexes for map tiles).
     ### Parameters:
 
-      filepath: A string containing the file path from which the y-coordinate will be extracted.
+    filepath: A string containing the file path from which the y-coordinate will be extracted.
 
     ### Returns:
 
-      An integer representing the extracted y-coordinate.
+    An integer representing the extracted y-coordinate.
 
     ### Working Principle:
 
-      The function splits the filepath string using the slash / as a delimiter.
-      It then accesses the 6th index (assuming 0-based indexing) of the resulting list to obtain the y-coordinate.
-      The y-coordinate part may contain the file extension, so it's further split using the dot . as a delimiter, and the first part is converted to an integer
+    The function splits the filepath string using the slash / as a delimiter.
+    It then accesses the 6th index (assuming 0-based indexing) of the resulting list to obtain the y-coordinate.
+    The y-coordinate part may contain the file extension, so it's further split using the dot . as a delimiter, and the first part is converted to an integer
 
     ## runPipeline
 
     ### Description:
 
-      This function serves as the main driver of the elevation data processing and visualization pipeline. It orchestrates the sequence of operations required to transform tile data into a color-mapped, composite representation of elevation             gradients across a given geographical area (in this case, Europe).
+  This function serves as the main driver of the elevation data processing and visualization pipeline. It orchestrates the sequence of operations required to transform tile data into a color-mapped,       composite representation of elevation             gradients across a given geographical area (in this case, Europe).
 
-      ### Working Steps:
+  ### Working Steps:
 
-      Define Geographical Bounds: Set the geographical coordinates for Europe as a tuple of (max_latitude, min_longitude, min_latitude, max_longitude).
+  Define Geographical Bounds: Set the geographical coordinates for Europe as a tuple of (max_latitude, min_longitude, min_latitude, max_longitude).
 
-      Generate Tile URLs: Generate the URLs for map tiles that span the defined geographical area using the function generateTileUrls.
+  Generate Tile URLs: Generate the URLs for map tiles that span the defined geographical area using the function generateTileUrls.
 
-      Load Image Data: Load the image data (map tiles) from the generated URLs into a Spark DataFrame using PySpark's read.format().
+  Load Image Data: Load the image data (map tiles) from the generated URLs into a Spark DataFrame using PySpark's read.format().
 
-      Refine Image Data: Extract the x and y tile indices from the origin column of the DataFrame and sort the rows based on these indices.
+  Refine Image Data: Extract the x and y tile indices from the origin column of the DataFrame and sort the rows based on these indices.
 
-      Extract Pixel Data: Select only the data column from the DataFrame, which contains the pixel information.
+  Extract Pixel Data: Select only the data column from the DataFrame, which contains the pixel information.
 
-      Reshape Pixel Data: Convert the PySpark DataFrame to an RDD and reshape the pixel data into NumPy arrays of shape (256, 256, 3).
+  Reshape Pixel Data: Convert the PySpark DataFrame to an RDD and reshape the pixel data into NumPy arrays of shape (256, 256, 3).
 
-      Calculate Elevation: Use the function calculateElevation to transform the pixel data to elevation data.
+  Calculate Elevation: Use the function calculateElevation to transform the pixel data to elevation data.
 
-      Compute Gradients: Compute the x and y gradients using Sobel filters via OpenCV's cv2.Sobel() function.
+  Compute Gradients: Compute the x and y gradients using Sobel filters via OpenCV's cv2.Sobel() function.
 
-      Compute Gradient Magnitude: Calculate the magnitude of the gradients from the x and y components.
+  Compute Gradient Magnitude: Calculate the magnitude of the gradients from the x and y components.
 
-      Generate Thresholds: Divide the gradient magnitude data into different groups using the function generateThresholds.
+  Generate Thresholds: Divide the gradient magnitude data into different groups using the function generateThresholds.
 
-      Apply Color Mapping: Apply color mapping to the gradient magnitude based on the threshold groups using the function applyColorMapping.
+  Apply Color Mapping: Apply color mapping to the gradient magnitude based on the threshold groups using the function applyColorMapping.
 
-      Display and Save Output: Use the function displayCompositeMap to display the final composite map. The composite map is also saved as a PNG file.
+  Display and Save Output: Use the function displayCompositeMap to display the final composite map. The composite map is also saved as a PNG file.
 
-    ### Outputs:
+  ### Outputs:
 
-      Displays the composite map showing elevation gradients with applied color mapping.
+  Displays the composite map showing elevation gradients with applied color mapping.
       Saves the composite map as a PNG file named color_mapped_output.png
 
 ## Results
